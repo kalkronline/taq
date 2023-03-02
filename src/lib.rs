@@ -1,10 +1,13 @@
+//! Task management abstraction.
+
+/// Error types and what not.
 pub mod error;
-mod futgen;
-mod taq;
+mod handle;
+mod job;
+mod manager;
+mod task;
 
-pub use futgen::*;
-pub use taq::*;
-
-pub mod prelude {
-    pub use crate::{Handle, Task, TaskManager};
-}
+pub use handle::Handle;
+pub use job::Job; // and job macro
+pub use manager::TaskManager;
+pub use task::{run, Task};

@@ -1,19 +1,14 @@
-use std::{hint::unreachable_unchecked, time::Duration};
-use taq::{Task, TaskManager};
+use std::time::Duration;
+use taq::*;
 use tokio::time::sleep;
 
+#[derive(Default)]
 pub struct Interval {
     dur: Duration,
     cb: Option<Box<dyn FnMut() + Send>>,
 }
 
 impl Interval {
-    pub fn new() -> Self {
-        let dur = Duration::ZERO; // doesn't really matter
-        let cb = None;
-        Self { dur, cb }
-    }
-
     pub fn set_interval<F>(&mut self, cb: F, dur: Duration)
     where
         F: FnMut() + Send + 'static,
@@ -41,23 +36,22 @@ impl Task for Interval {
     async fn task(mut self, mut manager: TaskManager<Self>) -> Option<()> {
         loop {
             tokio::select! {
-                biased;
                 _ = self.interval() => unreachable!(),
-                giver = manager.self_req() => giver?.give(&mut self).await,
+                withr = manager.poll() => withr?.with(&mut self).await,
             }
         }
     }
 }
 
 #[tokio::main]
-async fn main() {
-    let handle = taq::spawn(Interval::new());
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let handle = taq::run(Interval::default());
 
-    handle
-        .run(taq::futgen!(|t| {
-            t.set_interval(|| println!("Hello, world!"), Duration::from_secs(1));
-        }))
-        .unwrap()
-        .await
-        .unwrap();
+    handle.run(job!(|interval| {
+        interval.set_interval(|| println!("hello"), Duration::from_secs(1));
+    }))?;
+
+    futures::future::pending::<()>().await;
+
+    unreachable!()
 }

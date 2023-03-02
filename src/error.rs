@@ -1,18 +1,25 @@
 use std::fmt;
 
+/// Helper type for a `Result` with a `TaqError`.
 pub type TaqResult<R> = Result<R, TaqError>;
 
 use TaqError::*;
 
+#[derive(Debug)]
 pub enum TaqError {
-    /// An error occurred while sending a message to a task.
-    Send,
+    /// The operation could not be completed because the task has been closed.
+    SendToClosed,
 }
 
-impl fmt::Debug for TaqError {
+impl fmt::Display for TaqError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Send => write!(f, "An error occurred while sending a message to a task."),
+            SendToClosed => write!(
+                f,
+                "The operation could not be completed because the task has been closed."
+            ),
         }
     }
 }
+
+impl std::error::Error for TaqError {}
