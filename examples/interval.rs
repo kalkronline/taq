@@ -37,7 +37,7 @@ impl Task for Interval {
         loop {
             tokio::select! {
                 _ = self.interval() => unreachable!(),
-                withr = manager.poll() => withr?.with(&mut self).await,
+                run = manager.poll() => run?.with(&mut self).await,
             }
         }
     }
@@ -50,6 +50,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     handle.run(job!(|interval| {
         interval.set_interval(|| println!("hello"), Duration::from_secs(1));
     }))?;
+
+    let _ = handle.clone();
 
     futures::future::pending::<()>().await;
 

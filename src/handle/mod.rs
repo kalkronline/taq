@@ -1,5 +1,6 @@
 use crate::error::{TaqError, TaqResult};
 use crate::job::Job;
+use crate::task::Task;
 use tokio::sync::mpsc;
 
 /// Extension traits for [`Handle`].
@@ -11,10 +12,12 @@ type Tx<T> = mpsc::UnboundedSender<Job<T, ()>>;
 ///
 /// This struct implements [`Clone`], allowing multiple
 /// handles to be created for the same task.
-#[derive(Clone)]
-pub struct Handle<A>(Tx<A>);
+pub struct Handle<A: Task>(Tx<A>);
 
-impl<A: Send + 'static> Handle<A> {
+impl<A> Handle<A>
+where
+    A: Task + Send + 'static,
+{
     pub(crate) fn new(tx: Tx<A>) -> Self {
         Self(tx)
     }
@@ -41,5 +44,11 @@ impl<A: Send + 'static> Handle<A> {
     pub fn run(&self, func: Job<A, ()>) -> TaqResult<()> {
         self.0.send(func).map_err(|_| TaqError::SendToClosed)?;
         Ok(())
+    }
+}
+
+impl<T: Task> Clone for Handle<T> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
     }
 }

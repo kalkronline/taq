@@ -3,11 +3,11 @@ use tokio::sync::mpsc;
 
 type Rx<T> = mpsc::UnboundedReceiver<Job<T, ()>>;
 
-/// Utility provided to a [`Task`] implementor for managing incoming
+/// Utility provided to a [`Task`] implementer for managing incoming
 /// [`Jobs`](crate::Job).
 ///
 /// See the documentation for [`Task`] for usage details.
-pub struct TaskManager<T>(Rx<T>);
+pub struct TaskManager<T: Task>(Rx<T>);
 
 impl<T: Task> TaskManager<T> {
     pub(crate) fn new(rx: Rx<T>) -> Self {
