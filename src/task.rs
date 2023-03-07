@@ -63,3 +63,14 @@ where
 
     handle
 }
+
+/// Runs a [`Task`] and saves the handle to the global state.
+///
+/// # Panics
+/// ... if the global state has already been set.
+pub fn run_global<T>(task: T)
+where
+    T: Task + Send + Sync + 'static,
+{
+    crate::global::set(run(task));
+}

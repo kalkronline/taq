@@ -1,8 +1,8 @@
 use crate::{error::TaqResult, job, Handle, Job, Task};
 use tokio::sync::oneshot;
 
-/// Simplifies message passing to [`Tasks`](crate::Task).
-pub trait Recv<A, R> {
+/// Extentions for [`Handle`].
+pub trait HandleExt<A, R> {
     /// Sends a [`Job`] to the task and return a receiver for its result.
     ///
     /// # Errors
@@ -19,7 +19,7 @@ pub trait Recv<A, R> {
 }
 
 #[doc(hidden)]
-impl<A: Task + Send + 'static, R: Send + 'static> Recv<A, R> for Handle<A> {
+impl<A: Task + Send + 'static, R: Send + 'static> HandleExt<A, R> for Handle<A> {
     fn recv(&self, func: Job<A, R>) -> TaqResult<oneshot::Receiver<R>> {
         let (tx, rx) = oneshot::channel();
 

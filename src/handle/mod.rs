@@ -3,8 +3,8 @@ use crate::job::Job;
 use crate::task::Task;
 use tokio::sync::mpsc;
 
-/// Extension traits for [`Handle`].
-pub mod ext;
+mod ext;
+pub use ext::HandleExt;
 
 type Tx<T> = mpsc::UnboundedSender<Job<T, ()>>;
 
