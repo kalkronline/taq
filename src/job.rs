@@ -27,6 +27,12 @@ macro_rules! job {
     ( |$a:ident$(: $t:ty)?| $b:tt ) => {
         $crate::Job::new(Box::new(|$a$(: $t)?| Box::pin(async move $b)))
     };
+    ( move |$a:ident$(: $t:ty)?| $b:stmt ) => {
+        $crate::Job::new(Box::new(move |$a$(: $t)?| Box::pin(async move { $b })))
+    };
+    ( move |$a:ident$(: $t:ty)?| $b:tt ) => {
+        $crate::Job::new(Box::new(move |$a$(: $t)?| Box::pin(async move $b)))
+    };
 }
 
 /// Do work on a mutable reference through a closure.
